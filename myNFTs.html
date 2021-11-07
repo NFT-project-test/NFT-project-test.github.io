@@ -1,0 +1,86 @@
+<html>
+<head>
+    <script src="https://npmcdn.com/moralis@0.0.35/dist/moralis.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+	<link href="./custom.css" rel="stylesheet">
+</head>
+<body>
+
+    <div class="topnav">
+		<a href="index.html">Home</a>
+		<a class="active" href="myNFTs.html">My NFT's</a>
+		<a href="#MarketPlace">Marketplace</a>
+		<a href="#Roadmap">Roadmap</a>
+	</div>
+
+    <div id="content"></div>
+    <script>
+        Moralis.initialize("0NKjNkyQR09bP1Tji1aNXOz8Sb852frlv8ged1S6");
+        Moralis.serverURL = "https://asmgekrdxkzc.usemoralis.com:2053/server";
+        let userAccount = 0;
+        async function getAccount() {
+            Moralis.authenticate().then(function (user) {
+                console.log(user.get('ethAddress'));
+                userAccount = user.get('ethAddress');
+                console.log(userAccount);  
+                    getNFTsForContract();})}
+		
+        async function getNFTsForContract() {  
+            if (userAccount == 0) {
+                getAccount();}   
+            
+
+            let options = {
+                chain: 'BSC',
+                address: userAccount,
+				token_address: '0xFc27bA34347AFccb2d386093b9671b53D2294a96'
+            }
+
+             // wallet address
+            console.log(getAccount.userAccount)
+
+            let nfts = await Moralis.Web3API.account.getNFTsForContract(options);
+            console.log(nfts);
+             
+
+            let size = 'width="200" height="250"';
+  
+            nfts.result.forEach(function (nft) {
+                let url = fixURL(nft.token_uri);
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+					
+		
+                        $("#content").html($("#content").html() + "<h2>" + data.name);
+
+               
+                            
+                        $("#content").html($("#content").html() + "<h3>" + data.description + "</h3>");
+              
+                        $("#content").html($("#content").html() + "<img src='" + data.image + "'" +
+                            size + "></img>");
+                    });
+
+            })
+
+        }
+
+        function fixURL(url) {
+            if (url.startsWith("ipfs")) {
+                return "https://ipfs.moralis.io:2053/ipfs/" + url.split("ipfs://ipfs/").slice(-1)[0];
+            } else {
+                return url + "?format=json"
+            }
+        }
+        function fixURL2(url) {
+            if (url.startsWith("ipfs")) {
+                return "https://ipfs.moralis.io:2053/ipfs/" + url.split("ipfs://").slice(-1)[0];
+            }
+        }
+        getNFTsForContract()
+    </script>
+</body>
+</html>
